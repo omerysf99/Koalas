@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejderha Dünyası - TON Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --accent-purple: #7c69e3;
+            --text-gray: #888888;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            user-select: none;
+        }
+
+        /* Bakiye Kartları */
+        .balance-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .balance-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .balance-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .wallet-btn {
+            background-color: var(--accent-purple);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Orta Alan: Dönen Fan */
+        .fan-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fan-image {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            object-fit: cover;
+            animation: spin 3s linear infinite;
+            filter: drop-shadow(0 0 20px rgba(124, 105, 227, 0.3));
+            border: 4px solid rgba(124, 105, 227, 0.2);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Sayaç */
+        .counter-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .counter-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        .mining-stat {
+            color: var(--text-gray);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        /* Aksiyon Butonları */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+            margin-top: auto;
+            margin-bottom: 90px;
+        }
+
+        .btn {
+            padding: 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 16px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-claim { background: linear-gradient(135deg, #7c69e3, #5a49c2); }
+        .btn-boost { background: rgba(124, 105, 227, 0.15); border: 1px solid var(--accent-purple); }
+
+        /* Navigasyon */
+        .nav-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 85px;
+            background-color: #0f0f0f;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-gray);
+            font-size: 11px;
+            flex: 1;
+        }
+
+        .nav-item.active { color: white; }
+        .nav-active-bg {
+            background-color: #1a1a1a;
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mining Ekranı -->
+    <div id="screen-mining" class="p-5 flex flex-col h-full">
+        
+        <!-- Bakiye: TON -->
+        <div class="balance-card">
+            <div class="flex items-center">
+                <div class="balance-icon">
+                    <img src="ton.jpg" alt="TON" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'">
+                </div>
+                <div>
+                    <div class="text-[10px] text-gray-500 uppercase font-bold">TON Balance</div>
+                    <div class="text-sm font-extrabold tracking-tight" id="ton-balance-display">0.0000 TON</div>
+                </div>
+            </div>
+            <div class="wallet-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Bakiye: $DRAGON -->
+        <div class="balance-card">
+            <div class="flex items-center">
+                <div class="balance-icon">
+                    <img src="dragon.jpg" alt="DRAGON" onerror="this.style.display='none'; this.parentNode.innerText='🐉'">
+                </div>
+                <div>
+                    <div class="text-[10px] text-gray-500 uppercase font-bold">$DRAGON Balance</div>
+                    <div class="text-sm font-extrabold tracking-tight">0</div>
+                </div>
+            </div>
+            <div class="wallet-btn" style="background: #333;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Ana Madenci Ünitesi -->
+        <div class="fan-container">
+            <img src="fan.jpg" class="fan-image" alt="Mining Fan" onerror="this.src='https://via.placeholder.com/260/1a1a1a/7c69e3?text=FAN'">
+        </div>
+
+        <!-- Sayaç ve İstatistik -->
+        <div class="counter-container">
+            <div class="counter-text" id="mining-counter">0.0000000000</div>
+            <div class="text-xs text-blue-400 font-bold mb-2">TON MINING</div>
+            <div class="mining-stat">
+                <span class="opacity-50">Power:</span> 
+                <span class="text-white font-bold">1 GH/s</span> 
+                <span class="text-orange-500 animate-pulse">⚡</span>
+            </div>
+        </div>
+
+        <!-- Alt Butonlar -->
+        <div class="action-buttons">
+            <button class="btn btn-claim" onclick="claimRewards()">
+                <span>📥</span> Claim
+            </button>
+            <button class="btn btn-boost">
+                <span>🚀</span> Boost
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Navigasyon -->
+    <nav class="nav-container">
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8z"/></svg>
+            <span>Wallet</span>
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5s-3 1.34-3 3 1.34 3 3 3z"/></svg>
+            <span>Friends</span>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-active-bg">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="#7c69e3"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-white">Home</span>
+            </div>
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            <span>Missions</span>
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            <span>More</span>
+        </div>
+    </nav>
+
+    <script>
+        // Hesaplama: 1 Gün = 86400 saniye. 
+        // 1 TON / 86400 sn ≈ 0.00001157407407407407 TON Her Saniye
+        const DAILY_REWARD = 1.0;
+        const REWARD_PER_SECOND = DAILY_REWARD / 86400;
+        const UPDATE_INTERVAL_MS = 100;
+        const REWARD_PER_TICK = REWARD_PER_SECOND / (1000 / UPDATE_INTERVAL_MS);
+
+        // Her şey 0'dan başlıyor
+        let currentMiningSession = 0.0;
+        let totalTonBalance = 0.0;
+
+        const counterEl = document.getElementById('mining-counter');
+        const totalDisplayEl = document.getElementById('ton-balance-display');
+
+        // Madencilik Döngüsü
+        setInterval(() => {
+            currentMiningSession += REWARD_PER_TICK;
+            counterEl.innerText = currentMiningSession.toFixed(10);
+        }, UPDATE_INTERVAL_MS);
+
+        function claimRewards() {
+            if (currentMiningSession <= 0) return;
+
+            totalTonBalance += currentMiningSession;
+            totalDisplayEl.innerText = totalTonBalance.toFixed(4) + " TON";
+            
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-8 py-3 rounded-2xl z-50 font-bold shadow-2xl';
+            toast.innerText = '+' + currentMiningSession.toFixed(6) + ' TON Claimed! 🐉';
+            document.body.appendChild(toast);
+            
+            currentMiningSession = 0;
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
